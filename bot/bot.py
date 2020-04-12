@@ -1,16 +1,17 @@
-from telegram.ext import Updater
+from telegram.ext import Updater, PicklePersistence
 
 from bot.config import BOT_TOKEN
-from bot.handlers.echo_handler import EchoHandler
 
 
 class WeatherBot:
     _HANDLERS = [
-        EchoHandler
+
     ]
 
     def __init__(self):
-        self.updater = Updater(token=BOT_TOKEN, use_context=True)
+        self.persistence = PicklePersistence(filename='../bot.pickle')
+        self.updater = Updater(token=BOT_TOKEN, use_context=True, persistence=self.persistence)
+
         self.dispatcher = self.updater.dispatcher
         self._init_handlers()
 
