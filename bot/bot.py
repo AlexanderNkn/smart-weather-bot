@@ -1,11 +1,12 @@
 from telegram.ext import Updater, PicklePersistence
 
 from bot.config import BOT_TOKEN
+from bot.handlers.location_input import LocationInputConversation
 
 
 class WeatherBot:
     _HANDLERS = [
-
+        LocationInputConversation
     ]
 
     def __init__(self):
