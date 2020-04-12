@@ -1,8 +1,9 @@
 from telegram import ReplyKeyboardMarkup, KeyboardButton
-from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters
+from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, RegexHandler
 
 from bot.handlers.handler import Handler
 from bot import cities
+from bot.handlers.weather_handler import WeatherHandler
 
 
 class LocationInputConversation(Handler):
@@ -14,10 +15,10 @@ class LocationInputConversation(Handler):
     TRY_AGAIN = 3
 
     TEXTS = {
-        LOCATION_INPUT: "Hello! Please input your location.",
+        LOCATION_INPUT: "Please input your location.",
         LOCATION_CONFIRM: "{}\nIs it your location?",
         TRY_AGAIN: "I can't understand your location. Please, try again.",
-        ConversationHandler.END: "Nice! Set your location - {}."
+        ConversationHandler.END: "Nice! Set your location - {}.\n" + WeatherHandler.MAIN_MENU_TEXT
     }
 
     KEYBOARDS = {
@@ -29,15 +30,15 @@ class LocationInputConversation(Handler):
             [[KeyboardButton(text="Yes"), KeyboardButton(text="No")]],
             resize_keyboard=True
         ),
-        ConversationHandler.END: ReplyKeyboardMarkup(
-            [[KeyboardButton(text="Show weather")]],
-            resize_keyboard=True
-        )
+        ConversationHandler.END: WeatherHandler.MAIN_MENU_KEYBOARD
     }
 
     def __init__(self, dispatcher):
         self.handler = ConversationHandler(
-            entry_points=[CommandHandler("start", self.handle_start)],
+            entry_points=[
+                CommandHandler("start", self.handle_start),
+                RegexHandler('Change my location', self.send_location_input)
+            ],
             states={
                 self.LOCATION_INPUT: [
                     MessageHandler(Filters.text, self.handle_location_input),
@@ -54,7 +55,16 @@ class LocationInputConversation(Handler):
 
     def handle_start(self, update, context):
         if context.user_data.get('city') is not None:
-            print(f"City is {context.user_data['city']}")
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=WeatherHandler.MAIN_MENU_TEXT,
+                reply_markup=WeatherHandler.MAIN_MENU_KEYBOARD
+            )
+            return ConversationHandler.END
+
+        return self.send_location_input(update, context)
+
+    def send_location_input(self, update, context):
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=self.TEXTS[self.LOCATION_INPUT],
@@ -106,7 +116,6 @@ class LocationInputConversation(Handler):
                 return self.send_try_again(update, context)
 
             context.chat_data['found_cities'].pop(0)
-            print(context.chat_data['found_cities'])
             return self.send_location_confirmation(update, context)
 
     def handle_city_set(self, update, context, city):
