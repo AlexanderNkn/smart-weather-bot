@@ -1,6 +1,6 @@
 # Smart weather bot
 
-Бота можно найти по юзернейму [@smweatherbot](t.me/smweatherbot)
+Бота можно найти в Telegram по юзернейму [@smweatherbot](https://t.me/smweatherbot)
 
 ## Умный сервис прогноза погоды
 
