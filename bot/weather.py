@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime
+from datetime import timedelta
 
 from bot.config import OPEN_WEATHER_TOKEN
 
@@ -22,10 +23,13 @@ def get_city_weather(city_id):
 def humanize_weather(weather, format):
     main = weather['main']
     wind = weather['wind']
+    print(weather)
+
+    receiving = datetime.utcfromtimestamp(weather['dt']) + timedelta(seconds=weather['timezone'])
 
     kwargs = {
         'city': weather['name'],
-        'receiving': datetime.strftime(datetime.utcfromtimestamp(weather['dt']), '%H:%M'),
+        'receiving': datetime.strftime(receiving, '%H:%M'),
         'temperature': main['temp'],
         'pressure': main['pressure'],
         'humidity': main['humidity'],
