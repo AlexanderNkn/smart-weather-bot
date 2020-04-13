@@ -3,6 +3,7 @@ from datetime import datetime
 from datetime import timedelta
 
 from bot.config import OPEN_WEATHER_TOKEN
+from bot.texts import RAIN_TEXT, SNOW_TEXT, CLOUDS_TEXT, WIND_GUST_TEXT
 
 
 def get_city_weather(city_id):
@@ -41,24 +42,25 @@ def humanize_weather(weather, pattern):
         weather_description[main_information] = description
     additional_info.append(", ".join(weather_description.values()).capitalize())
 
+    if wind.get("gust") is not None:
+        additional_info.append(WIND_GUST_TEXT.format(wind['gust']))
+
     if weather.get('clouds') is not None:
-        additional_info.append(f"Clouds: {weather['clouds']['all']} %")
+        additional_info.append(CLOUDS_TEXT.format(weather['clouds']['all']))
 
     rain = weather.get("rain")
     if rain is not None:
-        rain_text = "Rain precipitation volume for {}: {}"
         if rain.get("1h") is not None:
-            additional_info.append(rain_text.format("hour", rain['1h']))
+            additional_info.append(RAIN_TEXT.format("hour", rain['1h']))
         if rain.get("3h") is not None:
-            additional_info.append(rain_text.format("3 hours", rain['3h']))
+            additional_info.append(RAIN_TEXT.format("3 hours", rain['3h']))
 
     snow = weather.get("snow")
     if snow is not None:
-        snow_text = "Snow precipitation volume for {}: {}"
         if snow.get("1h") is not None:
-            additional_info.append(snow_text.format("hour", snow['1h']))
+            additional_info.append(SNOW_TEXT.format("hour", snow['1h']))
         if snow.get("3h") is not None:
-            additional_info.append(snow_text.format("3 hours", snow['3h']))
+            additional_info.append(SNOW_TEXT.format("3 hours", snow['3h']))
 
     kwargs = {
         'city': weather['name'],
