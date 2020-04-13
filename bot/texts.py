@@ -38,3 +38,5 @@ WIND_GUST_TEXT = "💨 Wind gust: {}"
 CLOTHES_TEXT = "👖 I recommend you to wear {} because it's {} today."
 CLOTHES_WIND_TEXT = " Also you may need some kind of hat."
 CLOTHES_RAIN_TEXT = " Don't forget to take an umbrella!"
+
+UNKNOWN_ERROR_TEXT = "Unknown error. Please try later."

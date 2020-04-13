@@ -4,7 +4,7 @@ import datetime as dt
 from bot.handlers.handler import Handler
 from bot.utils.timezone import get_timezone_by_coords, parse_timezone
 from bot.utils.weather import get_city_weather
-from bot.texts import TIME_INPUT_TEXT, TIME_SET_TEXT, DAILY_WEATHER_TEXT
+from bot.texts import TIME_INPUT_TEXT, TIME_SET_TEXT, DAILY_WEATHER_TEXT, UNKNOWN_ERROR_TEXT
 from bot.keyboards import MAIN_MENU_KEYBOARD, TIME_INPUT_KEYBOARD
 
 
@@ -40,7 +40,7 @@ class DailyWeatherHandler(Handler):
         timezone_object = get_timezone_by_coords(longitude, latitude)
 
         if not timezone_object:
-            self.sender.message(update, "Unknown error. Please try later", MAIN_MENU_KEYBOARD)
+            self.sender.message(update, UNKNOWN_ERROR_TEXT, MAIN_MENU_KEYBOARD)
             return ConversationHandler.END
 
         timezone, zone_name = parse_timezone(timezone_object)
@@ -63,4 +63,7 @@ class DailyWeatherHandler(Handler):
     def send_daily_weather(self, context):
         city_id = context.job.context['city']['id']
         weather = get_city_weather(city_id, DAILY_WEATHER_TEXT)
+        if weather is None:
+            self.sender.message(context.job.context, UNKNOWN_ERROR_TEXT, MAIN_MENU_KEYBOARD)
+            return
         self.sender.job_context_message(context.job.context, weather, MAIN_MENU_KEYBOARD)

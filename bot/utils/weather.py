@@ -26,7 +26,7 @@ def get_city_weather(city_id, pattern):
         response = requests.get(url, params=params)
         return humanize_weather(response.json(), pattern)
     except requests.RequestException:
-        return "Unknown error. Please try later."
+        return
 
 
 def humanize_weather(weather, pattern):
