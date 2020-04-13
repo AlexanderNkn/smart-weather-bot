@@ -34,7 +34,7 @@ WIND_GUST_TEXT = "💨 Wind gust: {}"
 RAIN_TEXT = "🌧️ Rain precipitation volume for {}: {}"
 SNOW_TEXT = "❄️ Snow precipitation volume for {}: {}"
 CLOUDS_TEXT = "☁️ Clouds: {} %"
-WEATHER_DESCRIPTION = "{}\n"
+WEATHER_DESCRIPTION = "\n{}"
 
 CLOTHES_TEXT = "👖 I recommend you to wear {} because it's {} now."
 CLOTHES_WIND_TEXT = " Also you may need some kind of hat."

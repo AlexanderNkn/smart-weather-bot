@@ -68,7 +68,10 @@ def humanize_weather(weather, pattern):
                 weather_description[main_information] = description
             continue
         weather_description[main_information] = description
-    weather_info.append(WEATHER_DESCRIPTION.format(", ".join(weather_description.values()).capitalize()))
+    if weather_description:
+        weather_info.append(
+            WEATHER_DESCRIPTION.format(", ".join(weather_description.values()).capitalize())
+        )
 
     if weather.get("clouds") is not None:
         weather_info.append(CLOUDS_TEXT.format(weather["clouds"]["all"]))
