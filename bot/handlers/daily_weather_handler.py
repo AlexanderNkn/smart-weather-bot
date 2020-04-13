@@ -57,7 +57,7 @@ class DailyWeatherHandler(Handler):
         return ConversationHandler.END
 
     def handle_invalid_time(self, update, context):
-        self.sender.message(update, "Sorry, I can't understand that time, please try again")
+        self.sender.message(update, "Sorry, I can't understand that time, please try again", TIME_INPUT_KEYBOARD)
         return self.TIME_INPUT
 
     def send_daily_weather(self, context):
