@@ -58,6 +58,8 @@ class LocationInputConversation(Handler):
         return self.send_location_input(update, context)
 
     def send_location_input(self, update, context):
+        # We ask user for city name because OpenWeather API recommends to get weather by city ID.
+        # There are all available cities in assets/city.list.min.json.
         self.sender.message(update, LOCATION_INPUT_TEXT, LOCATION_INPUT_KEYBOARD)
         return self.LOCATION_INPUT
 
@@ -91,10 +93,11 @@ class LocationInputConversation(Handler):
         return self.LOCATION_INPUT
 
     def handle_location_confirm(self, update, context):
-        if update.message.text == "Yes":
+        answer = update.message.text.lower()
+        if answer == "yes":
             return self.handle_city_set(update, context, context.chat_data["found_cities"][0])
 
-        elif update.message.text == "No":
+        elif answer == "no":
             found_cities = context.chat_data["found_cities"]
             if len(found_cities) == 1:
                 return self.send_try_again(update)
