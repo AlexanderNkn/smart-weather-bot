@@ -79,21 +79,23 @@ def humanize_weather(weather, pattern):
 def get_clothes(weather):
     temp = weather['main']['temp']
     rain = weather.get("rain")
-    wind_speed = weather['wind']['speed']
+    heavy_wind = weather['wind']['speed'] > 6
 
     # First element of value is a clothes, second is a cause.
+    # Clothes recommendations are extensible - we just need to add condition and value.
     temperature_dependency = {
         temp <= 0: ("something warm (a winter jacket, for example)", "cold"),
         0 < temp < 9: ("some autumn jacket or warm sweater", "a little cold"),
         9 <= temp <= 14: ("hoodie or sweater", "warm"),
-        temp > 14 and not rain: ('T-shirt', "hot"),
-        temp > 14 and rain: ("hoodie or raincoat", "rain")
+        temp > 14 and not (rain or heavy_wind): ('T-shirt', "hot"),
+        temp > 14 and rain: ("hoodie or raincoat", "rain"),
+        temp > 14 and heavy_wind: ("windbreaker", "heavy wind")
     }
 
     result = CLOTHES_TEXT.format(*temperature_dependency[True])
     if rain:
         result += CLOTHES_RAIN_TEXT
-    if wind_speed > 6:
+    if heavy_wind:
         result += CLOTHES_WIND_TEXT
 
     return result

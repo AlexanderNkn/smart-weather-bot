@@ -30,5 +30,5 @@ CLOUDS_TEXT = "☁️ Clouds: {} %"
 WIND_GUST_TEXT = "💨 Wind gust: {}"
 
 CLOTHES_TEXT = "👖 I recommend you to wear {} because it's {} today."
-CLOTHES_WIND_TEXT = " Also you may need some kind of hat because it's heavy wind now."
+CLOTHES_WIND_TEXT = " Also you may need some kind of hat."
 CLOTHES_RAIN_TEXT = " Don't forget to take an umbrella!"
