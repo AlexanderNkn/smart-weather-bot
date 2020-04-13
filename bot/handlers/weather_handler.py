@@ -1,7 +1,7 @@
 from telegram.ext import MessageHandler, Filters
 
 from bot.handlers.handler import Handler
-from bot.weather import get_city_weather, humanize_weather
+from bot.utils.weather import get_city_weather, humanize_weather
 from bot.texts import WEATHER_TEXT
 from bot.keyboards import MAIN_MENU_KEYBOARD
 
