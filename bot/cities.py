@@ -24,3 +24,12 @@ def find_city_by_coords(longitude, latitude):
             result.append((city, longitude_diff + latitude_diff))
     result = sorted(result, key=lambda c: c[1])
     return [c[0] for c in result]
+
+
+def get_city_fullname(city):
+    """Return city name and country code if the last one exists."""
+    name = city['name']
+    country_code = city['country']
+    if country_code:
+        return ", ".join([country_code, name])
+    return name

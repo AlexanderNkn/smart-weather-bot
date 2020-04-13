@@ -5,6 +5,7 @@ from telegram.ext import (
     Filters,
 )
 
+from bot.cities import get_city_fullname
 from bot.handlers.handler import Handler
 from bot import cities
 from bot.texts import (
@@ -83,7 +84,7 @@ class LocationInputConversation(Handler):
     def send_location_confirmation(self, update, city):
         self.sender.message(
             update,
-            LOCATION_CONFIRM_TEXT.format(city["country"], city["name"]),
+            LOCATION_CONFIRM_TEXT.format(get_city_fullname(city)),
             LOCATION_CONFIRM_KEYBOARD,
         )
         return self.LOCATION_CONFIRM
@@ -96,9 +97,9 @@ class LocationInputConversation(Handler):
         answer = update.message.text.lower()
         if answer == "yes":
             return self.handle_city_set(update, context, context.chat_data["found_cities"][0])
-
         elif answer == "no":
             found_cities = context.chat_data["found_cities"]
+
             if len(found_cities) == 1:
                 return self.send_try_again(update)
 
