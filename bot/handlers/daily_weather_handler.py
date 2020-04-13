@@ -47,7 +47,11 @@ class DailyWeatherHandler(Handler):
         time = dt.datetime.strptime(update.message.text, "%H:%M").time().replace(tzinfo=timezone)
 
         # TODO: Make jobs persistence
-        context.job_queue.run_daily(self.send_daily_weather, time, context=context.user_data)
+        job_context = {
+            "chat_id": update.effective_chat.id,
+            "city": context.user_data['city']
+        }
+        context.job_queue.run_daily(self.send_daily_weather, time, context=job_context)
 
         self.sender.message(
             update,
