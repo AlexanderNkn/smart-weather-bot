@@ -12,7 +12,7 @@ class WeatherBot:
     ]
 
     def __init__(self):
-        self.persistence = PicklePersistence(filename='../bot.pickle')
+        self.persistence = PicklePersistence(filename='bot.pickle')
         self.updater = Updater(token=BOT_TOKEN, use_context=True, persistence=self.persistence)
 
         self.dispatcher = self.updater.dispatcher
