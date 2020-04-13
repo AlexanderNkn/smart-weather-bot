@@ -13,6 +13,7 @@ from bot.texts import (
     SNOW_TEXT,
     CLOUDS_TEXT,
     WIND_GUST_TEXT,
+    WEATHER_DESCRIPTION,
     CLOTHES_RAIN_TEXT,
     CLOTHES_WIND_TEXT,
     CLOTHES_TEXT,
@@ -67,7 +68,7 @@ def humanize_weather(weather, pattern):
                 weather_description[main_information] = description
             continue
         weather_description[main_information] = description
-    weather_info.append(", ".join(weather_description.values()).capitalize())
+    weather_info.append(WEATHER_DESCRIPTION.format(", ".join(weather_description.values()).capitalize()))
 
     if weather.get("clouds") is not None:
         weather_info.append(CLOUDS_TEXT.format(weather["clouds"]["all"]))
