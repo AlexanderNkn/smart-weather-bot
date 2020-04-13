@@ -8,7 +8,7 @@ from bot.keyboards import MAIN_MENU_KEYBOARD
 
 class WeatherHandler(Handler):
     def __init__(self, dispatcher):
-        self.handler = MessageHandler(Filters.regex("(?i)show weather(?-i:)"), self.send_weather)
+        self.handler = MessageHandler(Filters.regex("^.*(?i)show weather(?-i:)"), self.send_weather)
 
         super().__init__(dispatcher)
 

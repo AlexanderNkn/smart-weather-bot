@@ -33,7 +33,7 @@ class LocationInputConversation(Handler):
         self.handler = ConversationHandler(
             entry_points=[
                 CommandHandler("start", self.handle_start),
-                MessageHandler(Filters.regex(r"(?i)change my location(?-i:)"), self.send_location_input),
+                MessageHandler(Filters.regex(r"^.*(?i)change my location(?-i:)"), self.send_location_input),
             ],
             states={
                 self.LOCATION_INPUT: [
@@ -41,7 +41,7 @@ class LocationInputConversation(Handler):
                     MessageHandler(Filters.location, self.handle_location_input),
                 ],
                 self.LOCATION_CONFIRM: [
-                    MessageHandler(Filters.regex(r"(?i)yes|no(?-i:)"), self.handle_location_confirm)
+                    MessageHandler(Filters.regex(r"^.*(?i)yes|no(?-i:)"), self.handle_location_confirm)
                 ],
             },
             fallbacks=[],
@@ -94,9 +94,9 @@ class LocationInputConversation(Handler):
 
     def handle_location_confirm(self, update, context):
         answer = update.message.text.lower()
-        if answer == "yes":
+        if "yes" in answer:
             return self.handle_city_set(update, context, context.chat_data["found_cities"][0])
-        elif answer == "no":
+        elif "no" in answer:
             found_cities = context.chat_data["found_cities"]
 
             if len(found_cities) == 1:
