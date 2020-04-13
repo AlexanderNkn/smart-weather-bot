@@ -3,7 +3,7 @@ from datetime import datetime
 from datetime import timedelta
 
 from bot.config import OPEN_WEATHER_TOKEN
-from bot.texts import RAIN_TEXT, SNOW_TEXT, CLOUDS_TEXT, WIND_GUST_TEXT
+from bot.texts import RAIN_TEXT, SNOW_TEXT, CLOUDS_TEXT, WIND_GUST_TEXT, CLOTHES_RAIN_TEXT, CLOTHES_WIND_TEXT, CLOTHES_TEXT
 
 
 def get_city_weather(city_id):
@@ -24,7 +24,6 @@ def get_city_weather(city_id):
 def humanize_weather(weather, pattern):
     main = weather['main']
     wind = weather['wind']
-    print(weather)
 
     receiving = datetime.utcfromtimestamp(weather['dt']) + timedelta(seconds=weather['timezone'])
 
@@ -71,7 +70,30 @@ def humanize_weather(weather, pattern):
         'wind_speed': wind['speed'],
         'wind_direction': wind['deg'],
         'additional_info': "\n".join(additional_info),
-        'clothes': ''
+        'clothes': get_clothes(weather)
     }
 
     return pattern.format(**kwargs)
+
+
+def get_clothes(weather):
+    temp = weather['main']['temp']
+    rain = weather.get("rain")
+    wind_speed = weather['wind']['speed']
+
+    # First element of value is a clothes, second is a cause.
+    temperature_dependency = {
+        temp <= 0: ("something warm (a winter jacket, for example)", "cold"),
+        0 < temp < 9: ("some autumn jacket or warm sweater", "a little cold"),
+        9 <= temp <= 14: ("hoodie or sweater", "warm"),
+        temp > 14 and not rain: ('T-shirt', "hot"),
+        temp > 14 and rain: ("hoodie or raincoat", "rain")
+    }
+
+    result = CLOTHES_TEXT.format(*temperature_dependency[True])
+    if rain:
+        result += CLOTHES_RAIN_TEXT
+    if wind_speed > 6:
+        result += CLOTHES_WIND_TEXT
+
+    return result
