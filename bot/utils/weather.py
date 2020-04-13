@@ -4,6 +4,11 @@ from datetime import timedelta
 
 from bot.config import OPEN_WEATHER_TOKEN
 from bot.texts import (
+    TEMPERATURE_TEXT,
+    HUMIDITY_TEXT,
+    PRESSURE_TEXT,
+    WIND_SPEED_TEXT,
+    WIND_DIRECTION_TEXT,
     RAIN_TEXT,
     SNOW_TEXT,
     CLOUDS_TEXT,
@@ -31,11 +36,26 @@ def get_city_weather(city_id, pattern):
 
 def humanize_weather(weather, pattern):
     main = weather["main"]
-    wind = weather["wind"]
 
     receiving = datetime.utcfromtimestamp(weather["dt"]) + timedelta(seconds=weather["timezone"])
 
-    additional_info = []
+    weather_info = []
+
+    if main.get('temp') is not None:
+        weather_info.append(TEMPERATURE_TEXT.format(main['temp']))
+    if main.get('pressure') is not None:
+        weather_info.append(PRESSURE_TEXT.format(main['pressure']))
+    if main.get('humidity') is not None:
+        weather_info.append(HUMIDITY_TEXT.format(main['humidity']))
+
+    wind = weather.get('wind')
+    if wind:
+        if wind.get('speed') is not None:
+            weather_info.append(WIND_SPEED_TEXT.format(wind['speed']))
+        if wind.get('deg') is not None:
+            weather_info.append(WIND_DIRECTION_TEXT.format(wind['deg']))
+        if wind.get('gust') is not None:
+            weather_info.append(WIND_GUST_TEXT.format(wind['gust']))
 
     weather_description = {}
     for description_element in weather["weather"]:
@@ -47,37 +67,29 @@ def humanize_weather(weather, pattern):
                 weather_description[main_information] = description
             continue
         weather_description[main_information] = description
-    additional_info.append(", ".join(weather_description.values()).capitalize())
-
-    if wind.get("gust") is not None:
-        additional_info.append(WIND_GUST_TEXT.format(wind["gust"]))
+    weather_info.append(", ".join(weather_description.values()).capitalize())
 
     if weather.get("clouds") is not None:
-        additional_info.append(CLOUDS_TEXT.format(weather["clouds"]["all"]))
+        weather_info.append(CLOUDS_TEXT.format(weather["clouds"]["all"]))
 
     rain = weather.get("rain")
     if rain is not None:
         if rain.get("1h") is not None:
-            additional_info.append(RAIN_TEXT.format("hour", rain["1h"]))
+            weather_info.append(RAIN_TEXT.format("hour", rain["1h"]))
         if rain.get("3h") is not None:
-            additional_info.append(RAIN_TEXT.format("3 hours", rain["3h"]))
+            weather_info.append(RAIN_TEXT.format("3 hours", rain["3h"]))
 
     snow = weather.get("snow")
     if snow is not None:
         if snow.get("1h") is not None:
-            additional_info.append(SNOW_TEXT.format("hour", snow["1h"]))
+            weather_info.append(SNOW_TEXT.format("hour", snow["1h"]))
         if snow.get("3h") is not None:
-            additional_info.append(SNOW_TEXT.format("3 hours", snow["3h"]))
+            weather_info.append(SNOW_TEXT.format("3 hours", snow["3h"]))
 
     kwargs = {
         "city": weather["name"],
         "receiving": datetime.strftime(receiving, "%H:%M"),
-        "temperature": main["temp"],
-        "pressure": main["pressure"],
-        "humidity": main["humidity"],
-        "wind_speed": wind["speed"],
-        "wind_direction": wind["deg"],
-        "additional_info": "\n".join(additional_info),
+        "weather_info": "\n".join(weather_info),
         "clothes": get_clothes(weather),
     }
 
@@ -85,9 +97,18 @@ def humanize_weather(weather, pattern):
 
 
 def get_clothes(weather):
-    temp = weather["main"]["temp"]
+    main = weather["main"]
+    temp = main.get('temp')
+    if temp is None:
+        return "Sorry, I can't recommend you anything because I don't know the temperature in your city."
+
     rain = weather.get("rain")
-    heavy_wind = weather["wind"]["speed"] > 6
+
+    heavy_wind = False
+    wind = weather.get('wind')
+    if wind is not None:
+        if wind.get('speed') is not None:
+            heavy_wind = weather["wind"]["speed"] > 6
 
     # First element of value is a clothes, second is a cause.
     # Clothes recommendations are extensible - we just need to add condition and value.

@@ -16,13 +16,8 @@ Be careful!
 
 WEATHER_TEXT = """
 ☂️ Weather in 🌆 {city} at 🕙 {receiving} (last up-to-date information):
-🌡️ Temperature: {temperature} °C
-🌊 Humidity: {humidity} %
-🌀 Atmospheric pressure: {pressure} hPa
-💨 Wind speed: {wind_speed} meter/sec
-💨 Wind direction: {wind_direction}°
 
-{additional_info}
+{weather_info}
 
 {clothes}
 
@@ -30,10 +25,15 @@ WEATHER_TEXT = """
 
 DAILY_WEATHER_TEXT = "Daily weather for you  😊\n" + WEATHER_TEXT
 
+TEMPERATURE_TEXT = "🌡️ Temperature: {} °C"
+HUMIDITY_TEXT = "🌊 Humidity: {} %"
+PRESSURE_TEXT = "🌀 Atmospheric pressure: {} hPa"
+WIND_SPEED_TEXT = "💨 Wind speed: {} meter/sec"
+WIND_DIRECTION_TEXT = "💨 Wind direction: {}°"
+WIND_GUST_TEXT = "💨 Wind gust: {}"
 RAIN_TEXT = "🌧️ Rain precipitation volume for {}: {}"
 SNOW_TEXT = "❄️ Snow precipitation volume for {}: {}"
 CLOUDS_TEXT = "☁️ Clouds: {} %"
-WIND_GUST_TEXT = "💨 Wind gust: {}"
 
 CLOTHES_TEXT = "👖 I recommend you to wear {} because it's {} today."
 CLOTHES_WIND_TEXT = " Also you may need some kind of hat."
