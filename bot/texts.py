@@ -12,5 +12,8 @@ Humidity: {humidity} %
 Atmospheric pressure: {pressure} hPa
 Wind speed: {wind_speed} meter/sec
 Wind direction: {wind_direction}°
+
 {additional_info}
+
+{clothes}
 """
