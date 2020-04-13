@@ -1,9 +1,24 @@
-from telegram import ReplyKeyboardMarkup, KeyboardButton
-from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, RegexHandler
+from telegram.ext import (
+    ConversationHandler,
+    CommandHandler,
+    MessageHandler,
+    Filters,
+)
 
 from bot.handlers.handler import Handler
 from bot import cities
-from bot.handlers.weather_handler import WeatherHandler
+from bot.texts import (
+    MAIN_MENU_TEXT,
+    LOCATION_INPUT_TEXT,
+    LOCATION_CONFIRM_TEXT,
+    LOCATION_SET_TEXT,
+    TRY_AGAIN_TEXT,
+)
+from bot.keyboards import (
+    MAIN_MENU_KEYBOARD,
+    LOCATION_INPUT_KEYBOARD,
+    LOCATION_CONFIRM_KEYBOARD,
+)
 
 
 class LocationInputConversation(Handler):
@@ -11,65 +26,39 @@ class LocationInputConversation(Handler):
     LOCATION_INPUT = 1
     LOCATION_CONFIRM = 2
 
-    # Situations states
+    # States without own handling
     TRY_AGAIN = 3
-
-    TEXTS = {
-        LOCATION_INPUT: "Please input your location.",
-        LOCATION_CONFIRM: "{}\nIs it your location?",
-        TRY_AGAIN: "I can't understand your location. Please, try again.",
-        ConversationHandler.END: "Nice! Set your location - {}.\n" + WeatherHandler.MAIN_MENU_TEXT
-    }
-
-    KEYBOARDS = {
-        LOCATION_INPUT: ReplyKeyboardMarkup(
-            [[KeyboardButton(text="Send my location", request_location=True)]],
-            resize_keyboard=True
-        ),
-        LOCATION_CONFIRM: ReplyKeyboardMarkup(
-            [[KeyboardButton(text="Yes"), KeyboardButton(text="No")]],
-            resize_keyboard=True
-        ),
-        ConversationHandler.END: WeatherHandler.MAIN_MENU_KEYBOARD
-    }
 
     def __init__(self, dispatcher):
         self.handler = ConversationHandler(
             entry_points=[
                 CommandHandler("start", self.handle_start),
-                RegexHandler('Change my location', self.send_location_input)
+                MessageHandler(Filters.regex(r"(?i)change my location(?-i:)"), self.send_location_input),
             ],
             states={
                 self.LOCATION_INPUT: [
                     MessageHandler(Filters.text, self.handle_location_input),
-                    MessageHandler(Filters.location, self.handle_location_input)
+                    MessageHandler(Filters.location, self.handle_location_input),
                 ],
                 self.LOCATION_CONFIRM: [
-                    MessageHandler(Filters.text, self.handle_location_confirm)
-                ]
+                    MessageHandler(Filters.regex(r"(?i)yes|no(?-i:)"), self.handle_location_confirm)
+                ],
             },
             fallbacks=[],
-            allow_reentry=True
+            allow_reentry=True,
         )
         super().__init__(dispatcher)
 
     def handle_start(self, update, context):
-        if context.user_data.get('city') is not None:
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=WeatherHandler.MAIN_MENU_TEXT,
-                reply_markup=WeatherHandler.MAIN_MENU_KEYBOARD
-            )
+        if context.user_data.get("city") is not None:
+            # User does not need to input location with /start if he already has one
+            self.sender.message(update, MAIN_MENU_TEXT, MAIN_MENU_KEYBOARD)
             return ConversationHandler.END
 
         return self.send_location_input(update, context)
 
     def send_location_input(self, update, context):
-        context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=self.TEXTS[self.LOCATION_INPUT],
-            reply_markup=self.KEYBOARDS[self.LOCATION_INPUT]
-        )
+        self.sender.message(update, LOCATION_INPUT_TEXT, LOCATION_INPUT_KEYBOARD)
         return self.LOCATION_INPUT
 
     def handle_location_input(self, update, context):
@@ -80,53 +69,43 @@ class LocationInputConversation(Handler):
             found_cities = cities.find_city(update.message.text)
 
         if len(found_cities) == 0:
-            return self.send_try_again(update, context)
+            return self.send_try_again(update)
 
         if len(found_cities) == 1:
             city = found_cities[0]
             return self.handle_city_set(update, context, city)
 
-        context.chat_data['found_cities'] = found_cities
-        return self.send_location_confirmation(update, context)
+        context.chat_data["found_cities"] = found_cities
+        return self.send_location_confirmation(update, found_cities[0])
 
-    def send_location_confirmation(self, update, context):
-        found_cities = context.chat_data['found_cities']
-        context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=self.TEXTS[self.LOCATION_CONFIRM].format(found_cities[0]['name']),
-            reply_markup=self.KEYBOARDS[self.LOCATION_CONFIRM]
+    def send_location_confirmation(self, update, city):
+        self.sender.message(
+            update,
+            LOCATION_CONFIRM_TEXT.format(city["country"], city["name"]),
+            LOCATION_CONFIRM_KEYBOARD,
         )
         return self.LOCATION_CONFIRM
 
-    def send_try_again(self, update, context):
-        context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=self.TEXTS[self.TRY_AGAIN],
-            reply_markup=self.KEYBOARDS[self.LOCATION_INPUT]
-        )
+    def send_try_again(self, update):
+        self.sender.message(update, TRY_AGAIN_TEXT, LOCATION_INPUT_KEYBOARD)
         return self.LOCATION_INPUT
 
     def handle_location_confirm(self, update, context):
         if update.message.text == "Yes":
             return self.handle_city_set(update, context, context.chat_data["found_cities"][0])
+
         elif update.message.text == "No":
-            found_cities = context.chat_data['found_cities']
+            found_cities = context.chat_data["found_cities"]
+            if len(found_cities) == 1:
+                return self.send_try_again(update)
 
-            if len(found_cities) == 0:
-                return self.send_try_again(update, context)
-
-            context.chat_data['found_cities'].pop(0)
-            return self.send_location_confirmation(update, context)
+            context.chat_data["found_cities"].pop(0)
+            return self.send_location_confirmation(update, context.chat_data["found_cities"][0])
 
     def handle_city_set(self, update, context, city):
         context.user_data["city"] = city
         self.dispatcher.persistence.update_user_data(
-            user_id=update.message.from_user.id,
-            data=context.user_data
+            user_id=update.message.from_user.id, data=context.user_data
         )
-        context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=self.TEXTS[ConversationHandler.END].format(city['name']),
-            reply_markup=self.KEYBOARDS[ConversationHandler.END]
-        )
+        self.sender.message(update, LOCATION_SET_TEXT.format(city["name"]), MAIN_MENU_KEYBOARD)
         return ConversationHandler.END

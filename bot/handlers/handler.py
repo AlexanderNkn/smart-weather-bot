@@ -1,3 +1,6 @@
+from bot.message_sender import MessageSender
+
+
 class Handler:
     """
     Parent class for all handlers.
@@ -10,6 +13,8 @@ class Handler:
 
     def __init__(self, dispatcher):
         self.dispatcher = dispatcher
+
+        self.sender = MessageSender(self.dispatcher.bot)
 
         self._register_handler()
 
