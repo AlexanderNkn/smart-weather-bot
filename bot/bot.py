@@ -1,6 +1,7 @@
 from telegram.ext import Updater, PicklePersistence
 
 from bot.config import BOT_TOKEN
+from bot.handlers.daily_weather_handler import DailyWeatherHandler
 from bot.handlers.location_input import LocationInputConversation
 from bot.handlers.weather_handler import WeatherHandler
 
@@ -8,7 +9,8 @@ from bot.handlers.weather_handler import WeatherHandler
 class WeatherBot:
     _HANDLERS = [
         LocationInputConversation,
-        WeatherHandler
+        WeatherHandler,
+        DailyWeatherHandler
     ]
 
     def __init__(self):

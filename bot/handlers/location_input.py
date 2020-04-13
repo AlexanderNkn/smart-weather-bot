@@ -55,6 +55,12 @@ class LocationInputConversation(Handler):
             self.sender.message(update, MAIN_MENU_TEXT, MAIN_MENU_KEYBOARD)
             return ConversationHandler.END
 
+        # Saving chat id to `context.user_data` to use it in `job.context`
+        context.user_data['chat_id'] = update.effective_chat.id
+        self.dispatcher.persistence.update_user_data(
+            user_id=update.message.from_user.id, data=context.user_data
+        )
+
         return self.send_location_input(update, context)
 
     def send_location_input(self, update, context):
