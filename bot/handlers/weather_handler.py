@@ -15,7 +15,7 @@ class WeatherHandler(Handler):
     def send_weather(self, update, context):
         city = context.user_data.get('city')
         if city is None:
-            self.sender.message(update, 'You need to input your location first.')
+            self.sender.message(update, 'Please, use command `/start/` to restart me.', MAIN_MENU_KEYBOARD)
             return
         weather = get_city_weather(city['id'], WEATHER_TEXT)
         if weather is None:

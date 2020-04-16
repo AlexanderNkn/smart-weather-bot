@@ -30,6 +30,10 @@ class DailyWeatherHandler(Handler):
         super().__init__(dispatcher)
 
     def send_time_input(self, update, context):
+        city = context.user_data.get('city')
+        if city is None:
+            self.sender.message(update, 'Please, use command `/start/` to restart me.', MAIN_MENU_KEYBOARD)
+            return ConversationHandler.END
         self.sender.message(update, TIME_INPUT_TEXT, TIME_INPUT_KEYBOARD)
         return self.TIME_INPUT
 
