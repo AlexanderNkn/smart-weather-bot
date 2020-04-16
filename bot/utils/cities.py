@@ -5,14 +5,15 @@ with open("bot/assets/city.list.min.json", encoding="utf-8") as f:
 
 
 def find_city(query):
-    results = []
+    exact_match_results = []
+    substring_match_results = []
     for city in CITIES:
         city_name = city["name"].lower()
         if query.lower() == city_name:
-            results.insert(0, city)
+            exact_match_results.append(city)
         elif query.lower() in city_name:
-            results.append(city)
-    return results
+            substring_match_results.append(city)
+    return exact_match_results + substring_match_results
 
 
 def find_city_by_coords(longitude, latitude):
