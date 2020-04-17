@@ -55,12 +55,6 @@ class LocationInputConversation(Handler):
             self.sender.message(update, MAIN_MENU_TEXT, MAIN_MENU_KEYBOARD)
             return ConversationHandler.END
 
-        # Saving chat id to `context.user_data` to use it in `job.context`
-        context.user_data['chat_id'] = update.effective_chat.id
-        self.dispatcher.persistence.update_user_data(
-            user_id=update.message.from_user.id, data=context.user_data
-        )
-
         return self.send_location_input(update, context)
 
     def send_location_input(self, update, context):
@@ -112,9 +106,10 @@ class LocationInputConversation(Handler):
             return self.send_location_confirmation(update, context.chat_data["found_cities"][0])
 
     def handle_city_set(self, update, context, city):
-        context.user_data["city"] = city
+        context.user_data.update({"city": city})
         self.dispatcher.persistence.update_user_data(
             user_id=update.message.from_user.id, data=context.user_data
         )
+        self.dispatcher.persistence.flush()
         self.sender.message(update, LOCATION_SET_TEXT.format(city["name"]), MAIN_MENU_KEYBOARD)
         return ConversationHandler.END

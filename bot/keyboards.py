@@ -16,7 +16,20 @@ LOCATION_CONFIRM_KEYBOARD = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-TIME_INPUT_KEYBOARD = ReplyKeyboardMarkup(
-    [[KeyboardButton(text="06:00")], [KeyboardButton(text="08:00")], [KeyboardButton(text="10:00")]],
+_ONLY_TIME_KEYBOARD_BUTTONS = [
+    [KeyboardButton(text="06:00")], [KeyboardButton(text="08:00")], [KeyboardButton(text="10:00")]
+]
+
+_DELETE_CURRENT_SUB_KEYBOARD_BUTTONS = _ONLY_TIME_KEYBOARD_BUTTONS + [
+    [KeyboardButton(text="❌ Cancel my current subscription")]
+]
+
+ONLY_TIME_INPUT_KEYBOARD = ReplyKeyboardMarkup(
+    _ONLY_TIME_KEYBOARD_BUTTONS,
+    resize_keyboard=True
+)
+
+DELETE_CURRENT_SUB_KEYBOARD = ReplyKeyboardMarkup(
+    _DELETE_CURRENT_SUB_KEYBOARD_BUTTONS,
     resize_keyboard=True
 )
