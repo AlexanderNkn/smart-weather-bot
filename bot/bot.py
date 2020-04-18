@@ -8,6 +8,7 @@ from bot.handlers.daily_weather_handler import DailyWeatherHandler
 from bot.handlers.location_input import LocationInputConversation
 from bot.handlers.unknown_command_handler import UnknownCommandHandler
 from bot.handlers.weather_handler import WeatherHandler
+from bot.utils.logging import log_update
 
 
 class WeatherBot:
@@ -31,6 +32,7 @@ class WeatherBot:
 
     def process_update(self, raw_json):
         update = Update.de_json(json.loads(raw_json), self.updater.bot)
+        log_update(update)
         self.dispatcher.process_update(update)
 
     def _init_handlers(self):
