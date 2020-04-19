@@ -30,6 +30,10 @@ class WeatherBot:
         self.updater.bot.delete_webhook()
         self.updater.bot.set_webhook(url=f'https://textgarbler.pythonanywhere.com/{BOT_TOKEN}')
 
+    def start_polling(self):
+        self.updater.start_polling()
+        self.updater.idle()
+
     def process_update(self, raw_json):
         update = Update.de_json(json.loads(raw_json), self.updater.bot)
         log_update(update)
