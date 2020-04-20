@@ -9,7 +9,7 @@ TIME_INPUT_TEXT = "Ok, please input time you want to get weather information (us
 TIME_SET_TEXT = "Nice! I will send you weather every day at {} in {} timezone.\n" \
                 + MAIN_MENU_TEXT  # time and timezone
 
-CORONAVIRUS_WARNING = """😷 And if possible, don't leave home!
+CORONAVIRUS_WARNING = """😷 And if it's possible, don't leave home!
 Self-isolation is the best way to win in this difficult situation in the world.
 Be careful!
 """

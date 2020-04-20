@@ -2,7 +2,7 @@ import logging
 
 from bot.bot import WeatherBot
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(filename="bot.log", level=logging.DEBUG)
 
 if __name__ == "__main__":
     bot = WeatherBot()
