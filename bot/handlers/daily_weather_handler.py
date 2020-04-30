@@ -33,7 +33,7 @@ class DailyWeatherHandler(Handler):
                     MessageHandler(Filters.regex(r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"), self.handle_time_input),
                     MessageHandler(
                         Filters.regex(r"^.*(?i)cancel all my subscriptions(?-i:)"),
-                        self.handle_delete_current_subscription
+                        self.handle_delete_subscriptions
                     ),
                     MessageHandler(Filters.text, self.handle_invalid_time)
                 ]
@@ -73,7 +73,7 @@ class DailyWeatherHandler(Handler):
             "city": context.user_data['city'],
         }
         job = {'context': job_context, 'time': time}
-        daily_jobs = context.user_data.get('daily_jobs', [])
+        daily_jobs = context.user_data.get('daily_jobs') or []
         daily_jobs.append(job)
         context.user_data.update({'daily_jobs': daily_jobs})
         self.dispatcher.persistence.update_user_data(
@@ -93,7 +93,7 @@ class DailyWeatherHandler(Handler):
         self.sender.message(update, "Sorry, I can't understand that time, please try again", _keyboard(context))
         return self.TIME_INPUT
 
-    def handle_delete_current_subscription(self, update, context):
+    def handle_delete_subscriptions(self, update, context):
         if context.user_data.get('daily_jobs') is None:
             self.sender.message(update, "You don't have any subscriptions.", ONLY_TIME_INPUT_KEYBOARD)
             return self.TIME_INPUT
@@ -101,14 +101,13 @@ class DailyWeatherHandler(Handler):
         user_chat_id = update.effective_chat.id
         for job in _find_user_jobs(user_chat_id, context.job_queue):
             job.schedule_removal()
-        context.user_data['daily_jobs'] = None
-        context.user_data['daily_job_time'] = None
+        context.user_data['daily_jobs'] = []
         self.dispatcher.persistence.update_user_data(
             user_id=update.message.from_user.id, data=context.user_data
         )
         self.dispatcher.persistence.flush()
 
-        self.sender.message(update, "Subscription canceled successfully!", MAIN_MENU_KEYBOARD)
+        self.sender.message(update, "Subscriptions canceled successfully!", MAIN_MENU_KEYBOARD)
         return ConversationHandler.END
 
     def send_daily_weather(self, context):
