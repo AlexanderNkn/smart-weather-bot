@@ -21,7 +21,7 @@ _ONLY_TIME_KEYBOARD_BUTTONS = [
 ]
 
 _DELETE_CURRENT_SUB_KEYBOARD_BUTTONS = _ONLY_TIME_KEYBOARD_BUTTONS + [
-    [KeyboardButton(text="❌ Cancel my current subscription")]
+    [KeyboardButton(text="❌ Cancel all my subscriptions")]
 ]
 
 ONLY_TIME_INPUT_KEYBOARD = ReplyKeyboardMarkup(

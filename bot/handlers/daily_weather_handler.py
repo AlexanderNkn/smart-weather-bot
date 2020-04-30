@@ -10,7 +10,7 @@ from bot.keyboards import MAIN_MENU_KEYBOARD, ONLY_TIME_INPUT_KEYBOARD, DELETE_C
 
 def _keyboard(context):
     """Return keyboard that depends on the availability of user job"""
-    if context.user_data.get('daily_job_context') is not None:
+    if context.user_data.get('daily_jobs') is not None:
         return DELETE_CURRENT_SUB_KEYBOARD
     return ONLY_TIME_INPUT_KEYBOARD
 
@@ -32,7 +32,7 @@ class DailyWeatherHandler(Handler):
                 self.TIME_INPUT: [
                     MessageHandler(Filters.regex(r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"), self.handle_time_input),
                     MessageHandler(
-                        Filters.regex(r"^.*(?i)cancel my current subscription(?-i:)"),
+                        Filters.regex(r"^.*(?i)cancel all my subscriptions(?-i:)"),
                         self.handle_delete_current_subscription
                     ),
                     MessageHandler(Filters.text, self.handle_invalid_time)
@@ -67,18 +67,15 @@ class DailyWeatherHandler(Handler):
         timezone, zone_name = parse_timezone(timezone_object)
         time = dt.datetime.strptime(update.message.text, "%H:%M").time().replace(tzinfo=timezone)
 
-        # Delete current user jobs
-        user_chat_id = update.effective_chat.id
-        for job in _find_user_jobs(user_chat_id, context.job_queue):
-            job.schedule_removal()
-
         # Make a new job
         job_context = {
             "chat_id": update.effective_chat.id,
             "city": context.user_data['city'],
         }
-        context.user_data.update({'daily_job_context': job_context})
-        context.user_data.update({"daily_job_time": time})
+        job = {'context': job_context, 'time': time}
+        daily_jobs = context.user_data.get('daily_jobs', [])
+        daily_jobs.append(job)
+        context.user_data.update({'daily_jobs': daily_jobs})
         self.dispatcher.persistence.update_user_data(
             user_id=update.message.from_user.id, data=context.user_data
         )
@@ -97,14 +94,14 @@ class DailyWeatherHandler(Handler):
         return self.TIME_INPUT
 
     def handle_delete_current_subscription(self, update, context):
-        if context.user_data.get('daily_job_context') is None:
+        if context.user_data.get('daily_jobs') is None:
             self.sender.message(update, "You don't have any subscriptions.", ONLY_TIME_INPUT_KEYBOARD)
             return self.TIME_INPUT
 
         user_chat_id = update.effective_chat.id
         for job in _find_user_jobs(user_chat_id, context.job_queue):
             job.schedule_removal()
-        context.user_data['daily_job_context'] = None
+        context.user_data['daily_jobs'] = None
         context.user_data['daily_job_time'] = None
         self.dispatcher.persistence.update_user_data(
             user_id=update.message.from_user.id, data=context.user_data
@@ -125,8 +122,9 @@ class DailyWeatherHandler(Handler):
     def _start_daily_jobs(self):
         job_queue = self.dispatcher.job_queue
         for user in self.dispatcher.persistence.get_user_data().values():
-            job_context = user.get('daily_job_context')
-            if job_context is None:
+            jobs = user.get('daily_jobs')
+            if jobs is None:
                 continue
-            daily_time = user.get('daily_job_time')
-            job_queue.run_daily(self.send_daily_weather, daily_time, context=job_context)
+            for job in jobs:
+                daily_time = job['time']
+                job_queue.run_daily(self.send_daily_weather, daily_time, context=job['context'])
